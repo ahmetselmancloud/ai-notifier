@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Yapay zeka asistanlari icin evrensel durum takip ve bildirim sistemi (Windows MVP)"
 requires-python = ">=3.11"
 dependencies = [
-    "uiautomation>=2.0.20",
+    "pywinauto>=0.6.9",
     "win11toast>=0.35",
 ]
 
