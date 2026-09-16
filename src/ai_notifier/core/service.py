@@ -1,7 +1,9 @@
 import asyncio
 
 from ai_notifier.core.dispatcher import NotificationDispatcher
+from ai_notifier.core.web_bridge import WebBridgeServer
 from ai_notifier.notifications.windows_toast import WindowsToastNotifier
+from ai_notifier.sensors.base import SensorState
 from ai_notifier.sensors.chatgpt_desktop import ChatGPTDesktopSensor
 from ai_notifier.sensors.claude_desktop import ClaudeDesktopSensor
 
@@ -18,7 +20,17 @@ async def _poll_sensors(dispatcher: NotificationDispatcher) -> None:
 
 async def _run() -> None:
     dispatcher = NotificationDispatcher(notifier=WindowsToastNotifier())
-    await _poll_sensors(dispatcher)
+
+    def on_web_state(site: str, state_str: str) -> None:
+        dispatcher.submit(site, SensorState(state_str))
+
+    bridge = WebBridgeServer(on_state=on_web_state)
+    await bridge.start()
+    print(f"Web bridge token (eklenti kurulumu için gerekmiyor, sadece bilgi): {bridge.token}")
+    try:
+        await _poll_sensors(dispatcher)
+    finally:
+        await bridge.stop()
 
 
 def run() -> None:
