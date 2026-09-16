@@ -22,6 +22,7 @@ async def _run() -> None:
     dispatcher = NotificationDispatcher(notifier=WindowsToastNotifier())
 
     def on_web_state(site: str, state_str: str) -> None:
+        print(f"[web] {site}: {state_str}")
         dispatcher.submit(site, SensorState(state_str))
 
     bridge = WebBridgeServer(on_state=on_web_state)

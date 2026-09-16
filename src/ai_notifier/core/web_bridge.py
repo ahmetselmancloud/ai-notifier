@@ -7,9 +7,7 @@ import websockets
 HOST = "127.0.0.1"
 PORT = 8765
 
-# Task 6'da, eklenti Chrome'a yüklendikten sonra gerçek eklenti ID'siyle
-# güncellenecek. Bkz. docs/superpowers/plans/2026-09-17-browser-extension.md Task 6.
-EXTENSION_ORIGIN = "chrome-extension://REPLACE_WITH_YOUR_EXTENSION_ID"
+EXTENSION_ORIGIN = "chrome-extension://jbkfcmcnbkdgmionadphlcclgiaooahc"
 
 VALID_STATES = {"generating", "done", "waiting_approval", "error"}
 
