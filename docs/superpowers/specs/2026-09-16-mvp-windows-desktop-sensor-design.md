@@ -61,20 +61,27 @@ gereksinimiyle (pencere minimize/arka plandayken de çalışmalı) uyumsuzdur �
 görünmeyen bir pencerenin pikselini yakalayamaz. UIAutomation API'si ise pencere görünür
 olmasa bile UI ağacını okuyabilir.
 
+> **Faz 0 revizyonu (2026-09-16):** İlk tasarımda "event subscription, polling değil" ve
+> `uiautomation` kütüphanesi öngörülmüştü. Faz 0 doğrulaması iki sorun ortaya çıkardı:
+> (1) `uiautomation` paketinin basit ağaç taramasıyla Claude Desktop'ın (Electron/Chromium)
+> içerik alanı hiç okunamadı — `pywinauto`'nun `uia` arka ucuna geçilerek çözüldü;
+> (2) ne `uiautomation` ne de `pywinauto`, gerçek bir UI Automation olay aboneliği
+> (event subscription) API'si sunuyor. Kullanıcıyla (Selman) görüşülerek MVP için
+> **polling**'e geçilmesine, event-driven tespitin (ham `comtypes` ile
+> `IUIAutomationEventHandler` COM arayüzü) ayrı bir sonraki iş olarak ele alınmasına
+> karar verildi. Detaylar: `docs/superpowers/plans/2026-09-16-faz0-findings.md`.
+
 Her adaptör:
 
-1. **Event subscription (olay aboneliği), polling değil.** Windows UI Automation'ın
-   `AutomationEventHandler` mekanizmasıyla ilgili pencerenin yapı/özellik değişikliklerine
-   abone olunur. Servis çoğu zaman "uyur", yalnızca gerçek bir UI değişikliği olduğunda
-   Windows tarafından tetiklenir. Bu, sabit aralıklı polling'e (örn. her 2 sn'de bir tüm
-   ağacı taramak) kıyasla CPU/pil yükünü neredeyse sıfıra indirir.
-2. **Hedefe kilitli sorgu.** Tetiklendiğinde adaptör tüm pencere ağacını değil, sadece
-   ilgili window handle içinde beklenen control type/name desenlerini arar (tam ağaç
-   dump'ı yapmaz).
-3. **Kararlılık doğrulama (debounce).** Faz 0'da gözlenen flaky-read sorununa karşı, bir
+1. **Hedefe kilitli polling.** Sabit bir aralıkla (MVP'de 2 sn) yalnızca ilgili window
+   handle içinde beklenen control type/name desenleri aranır — tüm ağaç dump'ı yapılmaz.
+   Bu, "event subscription" kadar hafif olmasa da, naif tam-ağaç taramasına göre CPU
+   yükünü büyük ölçüde düşük tutar. Gerçek event-driven tespit, ayrı bir teknik
+   iyileştirme olarak backlog'a alınmıştır.
+2. **Kararlılık doğrulama (debounce).** Faz 0'da gözlenen flaky-read sorununa karşı, bir
    durum değişikliği yalnızca art arda N okuma aynı sonucu verdiğinde kesinleşir ve
    bildirime dönüşür.
-4. **Durum çıktısı:** `GENERATING`, `DONE`, `WAITING_APPROVAL`, `ERROR`, `UNKNOWN`.
+3. **Durum çıktısı:** `GENERATING`, `DONE`, `WAITING_APPROVAL`, `ERROR`, `UNKNOWN`.
    `UNKNOWN` durumunda (uygulama kapalı, sinyal okunamıyor) sessizce beklenir, bildirim
    gönderilmez — yanlış pozitiften kaçınmak önceliklidir.
 
@@ -115,8 +122,8 @@ Bu yüzden:
 | Bileşen | Teknoloji |
 |---|---|
 | Core servis | Python 3.x, `asyncio` |
-| UI okuma | `uiautomation` (Windows UI Automation sarmalayıcısı) |
-| Bildirim | Windows Toast (`winrt`/`win10toast` benzeri) |
+| UI okuma | `pywinauto` (`uia` arka ucu) — Faz 0'da `uiautomation`'dan geçildi |
+| Bildirim | Windows Toast (`win11toast`) — Faz 1'de `win10toast`'tan geçildi (bkz. Task 5) |
 | Paketleme (Faz 3'e hazırlık, MVP'de değil) | PyInstaller |
 
 ## 7. Proje Konumu
