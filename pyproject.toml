@@ -9,7 +9,7 @@ description = "Yapay zeka asistanlari icin evrensel durum takip ve bildirim sist
 requires-python = ">=3.11"
 dependencies = [
     "pywinauto>=0.6.9",
-    "win11toast>=0.35",
+    "pywin32>=306",
 ]
 
 [project.optional-dependencies]

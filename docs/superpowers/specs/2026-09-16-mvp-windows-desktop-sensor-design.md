@@ -137,3 +137,13 @@ Bu yüzden:
 - Uygulama güncellemeleri (Claude Desktop/ChatGPT Desktop yeni sürüm) UI yapısını
   değiştirirse adaptörler kırılabilir — bu, uzun vadeli bakım riski olarak kabul edilmiştir
   (PDF'in kendisinin de işaret ettiği bir gerçek).
+- **Bildirim gösterimi paketlenmemiş (unpackaged) Python'da doğrulanamadı.** Task 5'te hem
+  WinRT Toast (`win11toast`) hem klasik tepsi balonu (`Shell_NotifyIcon`) denendi; ikisi de
+  API çağrısı olarak hatasız tamamlanıyor ama ekranda görünmüyor. Kök neden: Windows 10+'ta
+  her iki mekanizma da aynı AUMID tabanlı bildirim izin sistemine tabi ve çıplak bir
+  `python.exe`'nin bu izni alması güvenilir şekilde sağlanamıyor (kısayol + registry
+  denendi, sonuç değişmedi — `notifier.setting == DisabledForUser`). Bu, gerçek bir kurulum
+  paketiyle (Faz 3, PyInstaller + installer) kendiliğinden çözülmesi beklenen bilinen bir
+  sınır — MVP kodu doğru, sorun ortamın bu betiği "güvenilir uygulama" olarak tanımaması.
+  `DecisionEngine`/sensör/mesaj katmanları birim testleriyle ve gerçek pencereyle
+  doğrulandı; yalnızca son adım (ekranda görünen bildirim) paketleme sonrasına kaldı.
