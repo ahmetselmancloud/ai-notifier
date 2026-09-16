@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Callable
 
 
 class SensorState(Enum):
@@ -14,21 +13,19 @@ class SensorState(Enum):
 class BaseSensor(ABC):
     """Tek bir YZ masaüstü uygulamasını izleyen sensör adaptörlerinin ortak arayüzü.
 
-    Bir adaptör, hedef pencerede UI Automation olayına her tetiklendiğinde
-    hedefe kilitli bir sorgu yapar ve ham okumayı (henüz debounce edilmemiş)
-    on_state_changed callback'i ile bildirir. Kararlılık/debounce mantığı
-    burada DEĞİL, DecisionEngine'de uygulanır.
+    Faz 0 doğrulamasında `uiautomation`/`pywinauto` kütüphanelerinin gerçek bir UI
+    Automation olay aboneliği (event subscription) sunmadığı görüldü (bkz.
+    docs/superpowers/plans/2026-09-16-faz0-findings.md). Bu yüzden MVP, event-driven
+    yerine hedefe kilitli POLLING kullanır: core servis her sensörün read_state()
+    metodunu sabit aralıklarla çağırır. Kararlılık/debounce mantığı burada DEĞİL,
+    DecisionEngine'de uygulanır.
     """
 
     name: str
 
     @abstractmethod
-    def start(self, on_state_changed: Callable[[str, SensorState], None]) -> None:
-        """İzlemeyi başlatır; UI Automation olayına her tetiklendiğinde
-        on_state_changed(self.name, state) çağrılır."""
-        raise NotImplementedError
-
-    @abstractmethod
-    def stop(self) -> None:
-        """UI Automation olay aboneliğini kaldırır, kaynakları temizler."""
+    def read_state(self) -> SensorState:
+        """Hedef pencerede tek, hedefe kilitli bir okuma yapar (tüm ağacı taramaz)
+        ve ham (henüz debounce edilmemiş) durumu döner. Pencere bulunamıyorsa
+        SensorState.UNKNOWN döner."""
         raise NotImplementedError

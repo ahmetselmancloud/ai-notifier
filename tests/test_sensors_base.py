@@ -16,7 +16,7 @@ def test_base_sensor_cannot_be_instantiated_directly():
         BaseSensor()
 
 
-def test_base_sensor_subclass_must_implement_start_and_stop():
+def test_base_sensor_subclass_must_implement_read_state():
     class IncompleteSensor(BaseSensor):
         name = "incomplete"
 
@@ -28,11 +28,9 @@ def test_base_sensor_subclass_with_full_implementation_can_be_instantiated():
     class DummySensor(BaseSensor):
         name = "dummy"
 
-        def start(self, on_state_changed):
-            self._callback = on_state_changed
-
-        def stop(self):
-            pass
+        def read_state(self):
+            return SensorState.UNKNOWN
 
     sensor = DummySensor()
     assert sensor.name == "dummy"
+    assert sensor.read_state() is SensorState.UNKNOWN
