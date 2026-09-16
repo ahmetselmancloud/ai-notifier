@@ -1,6 +1,11 @@
+import asyncio
 import json
 
+import pytest
+import websockets
+
 from ai_notifier.core.web_bridge import (
+    WebBridgeServer,
     generate_token,
     is_valid_token_message,
     parse_client_message,
@@ -44,3 +49,63 @@ def test_is_valid_token_message_rejects_wrong_token():
 
 def test_is_valid_token_message_rejects_malformed_json():
     assert is_valid_token_message("{not json", "abc123") is False
+
+
+def test_server_rejects_connection_with_wrong_token():
+    async def scenario():
+        received = []
+        server = WebBridgeServer(
+            on_state=lambda site, state: received.append((site, state)),
+            token="expected-token",
+            port=8766,
+        )
+        await server.start()
+        try:
+            async with websockets.connect("ws://127.0.0.1:8766") as ws:
+                await ws.send(json.dumps({"token": "wrong-token"}))
+                with pytest.raises(websockets.ConnectionClosed):
+                    await ws.recv()
+        finally:
+            await server.stop()
+        assert received == []
+
+    asyncio.run(scenario())
+
+
+def test_server_forwards_valid_messages_after_correct_token():
+    async def scenario():
+        received = []
+        server = WebBridgeServer(
+            on_state=lambda site, state: received.append((site, state)),
+            token="expected-token",
+            port=8767,
+        )
+        await server.start()
+        try:
+            async with websockets.connect("ws://127.0.0.1:8767") as ws:
+                await ws.send(json.dumps({"token": "expected-token"}))
+                await ws.send(json.dumps({"site": "Claude (Web)", "state": "generating"}))
+                await asyncio.sleep(0.1)
+        finally:
+            await server.stop()
+        assert received == [("Claude (Web)", "generating")]
+
+    asyncio.run(scenario())
+
+
+def test_token_http_endpoint_returns_token_with_cors_header():
+    async def scenario():
+        server = WebBridgeServer(on_state=lambda site, state: None, token="expected-token", port=8768)
+        await server.start()
+        try:
+            reader, writer = await asyncio.open_connection("127.0.0.1", 8768)
+            writer.write(b"GET /token HTTP/1.1\r\nHost: 127.0.0.1\r\n\r\n")
+            await writer.drain()
+            response = await reader.read(2048)
+        finally:
+            await server.stop()
+        assert b"200" in response
+        assert b"Access-Control-Allow-Origin" in response
+        assert b"expected-token" in response
+
+    asyncio.run(scenario())
