@@ -10,7 +10,7 @@ from pathlib import Path
 import requests
 
 SUPABASE_URL = "https://wvhlikiiqrculbpvphxk.supabase.co"
-SUPABASE_ANON_KEY = "REPLACE_WITH_YOUR_SUPABASE_ANON_KEY"
+SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind2aGxpa2lpcXJjdWxicHZwaHhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1ODM4NzMsImV4cCI6MjEwNTE1OTg3M30.f2Qztv7xssStlPUAmGGCPAsHYuo-cv9aImBDpThmQs0"
 PAIRING_WEB_URL = "REPLACE_WITH_YOUR_VERCEL_URL/pair"
 
 CONFIG_PATH = Path(os.environ.get("APPDATA", ".")) / "ai-notifier" / "config.json"
