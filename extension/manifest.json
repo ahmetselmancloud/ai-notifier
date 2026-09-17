@@ -2,11 +2,13 @@
   "manifest_version": 3,
   "name": "AI-Notifier Web Sensörü",
   "version": "0.1.0",
-  "description": "claude.ai ve chatgpt.com sekmelerini izler, durum değişikliklerini yerel AI-Notifier servisine iletir.",
+  "description": "claude.ai, chatgpt.com, gemini.google.com ve chat.deepseek.com sekmelerini izler, durum değişikliklerini yerel AI-Notifier servisine iletir.",
   "permissions": ["scripting"],
   "host_permissions": [
     "https://claude.ai/*",
     "https://chatgpt.com/*",
+    "https://gemini.google.com/*",
+    "https://chat.deepseek.com/*",
     "http://127.0.0.1:8765/*"
   ],
   "background": {
@@ -14,7 +16,12 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://claude.ai/*", "https://chatgpt.com/*"],
+      "matches": [
+        "https://claude.ai/*",
+        "https://chatgpt.com/*",
+        "https://gemini.google.com/*",
+        "https://chat.deepseek.com/*"
+      ],
       "js": ["content_script.js"],
       "run_at": "document_idle"
     }
