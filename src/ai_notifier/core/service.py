@@ -10,8 +10,9 @@ from ai_notifier.notifications.windows_toast import WindowsToastNotifier
 from ai_notifier.sensors.base import SensorState
 from ai_notifier.sensors.chatgpt_desktop import ChatGPTDesktopSensor
 from ai_notifier.sensors.claude_desktop import ClaudeDesktopSensor
+from ai_notifier.sensors.gemini_desktop import GeminiDesktopSensor
 
-SENSORS = [ClaudeDesktopSensor(), ChatGPTDesktopSensor()]
+SENSORS = [ClaudeDesktopSensor(), ChatGPTDesktopSensor(), GeminiDesktopSensor()]
 POLL_INTERVAL_SECONDS = 2
 
 

@@ -1,3 +1,4 @@
+import threading
 import time
 
 import win32api
@@ -53,9 +54,11 @@ def _show_balloon(title: str, message: str) -> None:
         (hwnd, 0, info_flags, win32con.WM_USER + 20, hicon, "AI-Notifier", message, 10000, title),
     )
 
-    # Balonun Windows tarafından işlenip gösterilebilmesi için mesaj
-    # döngüsüne kısa, sınırlı bir süre ver; sonra tepsi ikonunu temizle.
-    for _ in range(15):
+    # İkonu balon tam görünüp kaybolmadan silmek, Windows'un balon animasyonunu
+    # iptal edebiliyor (2026-09-18'de canlı testte gözlemlendi: ToastEnabled açıkken
+    # bile 1.5 saniyelik bekleme sonrası hiçbir bildirim görünmedi). Bu yüzden ikon,
+    # istenen 10 saniyelik gösterim süresinden uzun kalacak şekilde bekletiliyor.
+    for _ in range(120):
         win32gui.PumpWaitingMessages()
         time.sleep(0.1)
 
@@ -64,8 +67,15 @@ def _show_balloon(title: str, message: str) -> None:
 
 
 class WindowsToastNotifier(NotificationSender):
+    """`_show_balloon` ~12 saniye boyunca (bkz. yukarıdaki yorum) kendi mesaj
+    döngüsünü çalıştırıp bloke olur; `send()` bunu ayrı bir thread'de başlatıp
+    hemen döner ki `NotificationDispatcher.submit` çağıran asyncio event loop'u
+    (sensör polling + web bridge) 12 saniye boyunca dondurmasın."""
+
     def __init__(self, show_fn=None):
         self._show_fn = show_fn if show_fn is not None else _show_balloon
 
     def send(self, title: str, message: str) -> None:
-        self._show_fn(title, message)
+        threading.Thread(
+            target=self._show_fn, args=(title, message), daemon=True
+        ).start()
