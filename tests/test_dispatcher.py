@@ -12,7 +12,7 @@ class FakeNotifier:
 
 def test_submit_sends_notification_after_stability_threshold():
     notifier = FakeNotifier()
-    dispatcher = NotificationDispatcher(notifier=notifier, stability_threshold=2)
+    dispatcher = NotificationDispatcher(notifiers=[notifier], stability_threshold=2)
 
     dispatcher.submit("Claude Desktop", SensorState.DONE)
     assert notifier.calls == []
@@ -23,7 +23,7 @@ def test_submit_sends_notification_after_stability_threshold():
 
 def test_submit_does_not_resend_unchanged_confirmed_state():
     notifier = FakeNotifier()
-    dispatcher = NotificationDispatcher(notifier=notifier, stability_threshold=2)
+    dispatcher = NotificationDispatcher(notifiers=[notifier], stability_threshold=2)
 
     dispatcher.submit("Claude Desktop", SensorState.DONE)
     dispatcher.submit("Claude Desktop", SensorState.DONE)
@@ -34,7 +34,7 @@ def test_submit_does_not_resend_unchanged_confirmed_state():
 
 def test_submit_tracks_sources_independently():
     notifier = FakeNotifier()
-    dispatcher = NotificationDispatcher(notifier=notifier, stability_threshold=2)
+    dispatcher = NotificationDispatcher(notifiers=[notifier], stability_threshold=2)
 
     dispatcher.submit("Claude Desktop", SensorState.DONE)
     dispatcher.submit("Claude Desktop", SensorState.DONE)
@@ -45,7 +45,7 @@ def test_submit_tracks_sources_independently():
 
 def test_submit_ignores_generating_state():
     notifier = FakeNotifier()
-    dispatcher = NotificationDispatcher(notifier=notifier, stability_threshold=2)
+    dispatcher = NotificationDispatcher(notifiers=[notifier], stability_threshold=2)
 
     dispatcher.submit("Claude Desktop", SensorState.GENERATING)
     dispatcher.submit("Claude Desktop", SensorState.GENERATING)

@@ -5,6 +5,7 @@ from ai_notifier.core.dispatcher import NotificationDispatcher
 from ai_notifier.core.pairing import run_pairing_flow
 from ai_notifier.core.tray import build_tray_icon
 from ai_notifier.core.web_bridge import WebBridgeServer
+from ai_notifier.notifications.push import PushNotifier
 from ai_notifier.notifications.windows_toast import WindowsToastNotifier
 from ai_notifier.sensors.base import SensorState
 from ai_notifier.sensors.chatgpt_desktop import ChatGPTDesktopSensor
@@ -22,7 +23,9 @@ async def _poll_sensors(dispatcher: NotificationDispatcher) -> None:
 
 
 async def _run() -> None:
-    dispatcher = NotificationDispatcher(notifier=WindowsToastNotifier())
+    dispatcher = NotificationDispatcher(
+        notifiers=[WindowsToastNotifier(), PushNotifier()]
+    )
 
     def on_web_state(site: str, state_str: str) -> None:
         dispatcher.submit(site, SensorState(state_str))

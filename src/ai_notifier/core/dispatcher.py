@@ -6,12 +6,14 @@ from ai_notifier.sensors.base import SensorState
 
 class NotificationDispatcher:
     """Herhangi bir kaynaktan (masaüstü polling, tarayıcı WebSocket) gelen ham
-    durumları DecisionEngine üzerinden geçirip onaylanan değişiklikleri bildirime
-    çevirir. Tüm sensör kaynakları bu tek noktayı paylaşır."""
+    durumları DecisionEngine üzerinden geçirip onaylanan değişiklikleri TÜM
+    bildirim kanallarına (Windows Toast + Push) birlikte gönderir."""
 
-    def __init__(self, notifier: NotificationSender, stability_threshold: int = 2):
+    def __init__(
+        self, notifiers: list[NotificationSender], stability_threshold: int = 2
+    ):
         self._engine = DecisionEngine(stability_threshold=stability_threshold)
-        self._notifier = notifier
+        self._notifiers = notifiers
 
     def submit(self, source_name: str, raw_state: SensorState) -> None:
         confirmed = self._engine.submit_reading(source_name, raw_state)
@@ -21,4 +23,5 @@ class NotificationDispatcher:
         if notification is None:
             return
         title, message = notification
-        self._notifier.send(title, message)
+        for notifier in self._notifiers:
+            notifier.send(title, message)
