@@ -1,6 +1,9 @@
 import asyncio
+import threading
 
 from ai_notifier.core.dispatcher import NotificationDispatcher
+from ai_notifier.core.pairing import run_pairing_flow
+from ai_notifier.core.tray import build_tray_icon
 from ai_notifier.core.web_bridge import WebBridgeServer
 from ai_notifier.notifications.windows_toast import WindowsToastNotifier
 from ai_notifier.sensors.base import SensorState
@@ -22,23 +25,26 @@ async def _run() -> None:
     dispatcher = NotificationDispatcher(notifier=WindowsToastNotifier())
 
     def on_web_state(site: str, state_str: str) -> None:
-        print(f"[web] {site}: {state_str}")
         dispatcher.submit(site, SensorState(state_str))
 
     bridge = WebBridgeServer(on_state=on_web_state)
     await bridge.start()
-    print(f"Web bridge token (eklenti kurulumu için gerekmiyor, sadece bilgi): {bridge.token}")
     try:
         await _poll_sensors(dispatcher)
     finally:
         await bridge.stop()
 
 
+def _run_service_loop() -> None:
+    asyncio.run(_run())
+
+
 def run() -> None:
-    try:
-        asyncio.run(_run())
-    except KeyboardInterrupt:
-        pass
+    service_thread = threading.Thread(target=_run_service_loop, daemon=True)
+    service_thread.start()
+
+    icon = build_tray_icon(on_pair=run_pairing_flow, on_quit=lambda: None)
+    icon.run()
 
 
 if __name__ == "__main__":
