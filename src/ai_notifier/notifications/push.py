@@ -5,7 +5,7 @@ import requests
 from ai_notifier.core.pairing import CONFIG_PATH, SUPABASE_ANON_KEY, SUPABASE_URL, load_config
 from ai_notifier.notifications.base import NotificationSender
 
-FIREBASE_SERVICE_ACCOUNT_PATH = "REPLACE_WITH_PATH_TO_YOUR_FIREBASE_SERVICE_ACCOUNT_JSON"
+FIREBASE_SERVICE_ACCOUNT_PATH = r"C:\Users\ahmet\AppData\Roaming\ai-notifier\firebase-service-account.json"
 
 _firebase_app = None
 
