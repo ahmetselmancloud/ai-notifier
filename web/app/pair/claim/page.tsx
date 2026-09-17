@@ -17,29 +17,26 @@ function ClaimPageContent() {
     if (!code) return;
 
     async function claimCode(userId: string) {
-      const { error } = await supabase
+      const { data: updatedRows, error } = await supabase
         .from("pairing_codes")
         .update({ status: "claimed", claimed_by_user_id: userId })
         .eq("code", code)
-        .eq("status", "pending");
+        .eq("status", "pending")
+        .select("desktop_instance_id");
 
-      if (error) {
+      // RLS, USING ilkesini karşılamayan bir satırı sessizce 0 satır olarak
+      // döner (hata FIRLATMAZ) — bu yüzden hem error hem boş sonucu kontrol
+      // etmek gerekiyor, aksi halde arayüz yanlışlıkla "başarılı" gösterebilir.
+      if (error || !updatedRows || updatedRows.length === 0) {
+        console.error("[ai-notifier] claim güncellemesi başarısız:", error, updatedRows);
         setClaimResult("error");
         return;
       }
 
-      const { data: row } = await supabase
-        .from("pairing_codes")
-        .select("desktop_instance_id")
-        .eq("code", code)
-        .single();
-
-      if (row) {
-        await supabase.from("devices").insert({
-          user_id: userId,
-          desktop_instance_id: row.desktop_instance_id,
-        });
-      }
+      await supabase.from("devices").insert({
+        user_id: userId,
+        desktop_instance_id: updatedRows[0].desktop_instance_id,
+      });
 
       setClaimResult("success");
     }
