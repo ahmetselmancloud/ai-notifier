@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "386459921843",
+    "project_id": "ai-notifier-ff1b4",
+    "storage_bucket": "ai-notifier-ff1b4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:386459921843:android:536ce1b7b3176612ccafc6",
+        "android_client_info": {
+          "package_name": "com.selman.ainotifier"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAeEXH3FynU8CUDbYvFO3y2e9cl99ee4PU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

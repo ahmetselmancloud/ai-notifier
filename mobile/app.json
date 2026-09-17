@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "AI-Notifier",
+    "slug": "ai-notifier-mobile",
+    "owner": "slmn45i",
+    "version": "0.1.0",
+    "scheme": "ainotifier",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.selman.ainotifier",
+      "googleServicesFile": "./google-services.json",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "@react-native-firebase/app",
+      "@react-native-firebase/messaging",
+      "expo-dev-client"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "a80acb38-b2b7-4513-9b84-a76ae759ebcc"
+      }
+    }
+  }
+}
